@@ -1,4 +1,5 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -9,9 +10,17 @@ export class AuthController {
   async register(
     @Body('email') email: string,
     @Body('password') password: string,
+    @Res({ passthrough: true }) res: Response,
     @Body('name') name?: string,
   ) {
-    return this.authService.register(email, password, name);
+    const { user, token } = await this.authService.register(email, password, name);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return { user };
   }
 
   @Post('login')
