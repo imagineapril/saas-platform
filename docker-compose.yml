@@ -22,6 +22,7 @@ services:
     environment:
       - PORT=4000
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/saas?schema=public
+      - JWT_SECRET=super_secret_key_change_me
     volumes:
       - ./apps/backend:/app
       - /app/node_modules
