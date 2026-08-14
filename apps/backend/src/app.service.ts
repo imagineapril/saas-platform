@@ -7,15 +7,4 @@ export class AppService {
   getHello(): string {
     return 'Hello World!';
   }
-
-  async testDb() {
-    const user = await this.prisma.user.create({
-      data: {
-        email: 'test@example.com',
-        password: 'hashed_password',
-        name: 'Test User',
-      },
-    });
-    return user;
-  }
 }
