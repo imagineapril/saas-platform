@@ -31,7 +31,11 @@ export class WorkspaceService {
       },
       include: {
         owner: true,
-        members: true,
+        members: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
@@ -39,7 +43,14 @@ export class WorkspaceService {
   async findOne(id: string, userId: string) {
     const workspace = await this.prisma.workspace.findUnique({
       where: { id },
-      include: { members: true, owner: true },
+      include: {
+        owner: true,
+        members: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
     if (!workspace) throw new ForbiddenException('Workspace not found');
     const isMember = workspace.members.some(m => m.userId === userId);
@@ -69,6 +80,11 @@ export class WorkspaceService {
     if (!workspace) throw new ForbiddenException('Workspace not found');
     const isOwner = workspace.members.some(m => m.userId === userId && m.role === 'owner');
     if (!isOwner) throw new ForbiddenException('Only owner can delete workspace');
+
+    await this.prisma.workspaceMember.deleteMany({
+      where: { workspaceId: id },
+    });
+    
     return this.prisma.workspace.delete({ where: { id } });
   }
 }
